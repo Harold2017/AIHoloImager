@@ -155,7 +155,10 @@ class Delighter:
         rough_shading = InvLuv2Rgb(inv_luv_shading)
         rough_albedo = img / rough_shading
 
-        rough_albedo *= 0.75 / torch.quantile(rough_albedo, 0.99)
+        # torch.quantile rejects tensors above 2^24 elements, so use the equivalent order statistic.
+        flat_albedo = rough_albedo.reshape(-1)
+        percentile_index = min(max(int(round(0.99 * (flat_albedo.numel() - 1))) + 1, 1), flat_albedo.numel())
+        rough_albedo *= 0.75 / torch.kthvalue(flat_albedo, percentile_index).values
         rough_albedo = rough_albedo.clip(1e-3)
         inv_rough_shading = Invert(img / rough_albedo)
 

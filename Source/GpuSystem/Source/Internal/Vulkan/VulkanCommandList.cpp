@@ -5,6 +5,7 @@
 
 #include <bit>
 #include <cassert>
+#include <exception>
 #include <format>
 #include <iostream>
 
@@ -41,7 +42,9 @@ namespace AIHoloImager
 
     VulkanCommandList::~VulkanCommandList()
     {
-        if ((cmd_buff_ != VK_NULL_HANDLE) && !closed_)
+        // Only a leaked command list is a programming error. When an exception unwinds, the list is
+        // abandoned on purpose and must not hide the original error behind an assertion.
+        if ((cmd_buff_ != VK_NULL_HANDLE) && !closed_ && (std::uncaught_exceptions() == 0))
         {
             Unreachable("Command list is destructed without executing.");
         }

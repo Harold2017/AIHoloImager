@@ -745,9 +745,8 @@ namespace AIHoloImager
             if (!py_init_finished_)
             {
                 PerfRegion wait_perf(aihi_.PerfProfilerInstance(), "Wait for init");
-                py_init_future_.wait();
-
                 py_init_finished_ = true;
+                py_init_future_.get();
             }
 
             {
