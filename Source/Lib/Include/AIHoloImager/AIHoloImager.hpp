@@ -25,6 +25,11 @@ namespace AIHoloImager
 
             Auto,
         };
+        enum class FeatureMatcher
+        {
+            SuperPointLightGlue,
+            LoMa,
+        };
 
     public:
         AIHoloImager(DeviceType device, Api api, const std::filesystem::path& tmp_dir, bool gpu_debug = false);
@@ -35,7 +40,8 @@ namespace AIHoloImager
         AIHoloImager& operator=(const AIHoloImager& rhs) = delete;
         AIHoloImager& operator=(AIHoloImager&& rhs) noexcept;
 
-        Mesh Generate(const std::filesystem::path& input_path, uint32_t texture_size, bool no_delight = false);
+        Mesh Generate(const std::filesystem::path& input_path, uint32_t texture_size, bool no_delight = false,
+            FeatureMatcher matcher = FeatureMatcher::SuperPointLightGlue);
 
     private:
         class Impl;

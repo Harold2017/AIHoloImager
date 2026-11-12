@@ -24,6 +24,7 @@ int main(int argc, char* argv[])
         ("I,input-path", "The directory that contains the input image sequence, or a single image file.", cxxopts::value<std::string>())
         ("O,output-path", "The path of the output mesh (\"<input-dir>/Output/Mesh.glb\" by default).", cxxopts::value<std::string>())
         ("D,device", "The computation device for inferencing (cuda or cpu; cuda by default).", cxxopts::value<std::string>())
+        ("matcher", "The feature matcher for SfM (lightglue or loma; lightglue by default).", cxxopts::value<std::string>())
         ("no-delight", "Disable image delighting.")
         ("gpu-debug", "Enable GPU system debugging information.")
         ("api", "Select which API to use (auto, d3d12, or vulkan; auto by default).", cxxopts::value<std::string>())
@@ -100,6 +101,28 @@ int main(int argc, char* argv[])
     const bool no_delight = (vm.count("no-delight") > 0);
     const bool gpu_debug = (vm.count("gpu-debug") > 0);
 
+    auto matcher = AIHoloImager::AIHoloImager::FeatureMatcher::SuperPointLightGlue;
+    if (vm.count("matcher") > 0)
+    {
+        std::string matcher_name = vm["matcher"].as<std::string>();
+        std::transform(
+            matcher_name.begin(), matcher_name.end(), matcher_name.begin(), [](char c) { return static_cast<char>(std::tolower(c)); });
+
+        if ((matcher_name == "lightglue") || (matcher_name == "superpoint"))
+        {
+            matcher = AIHoloImager::AIHoloImager::FeatureMatcher::SuperPointLightGlue;
+        }
+        else if (matcher_name == "loma")
+        {
+            matcher = AIHoloImager::AIHoloImager::FeatureMatcher::LoMa;
+        }
+        else
+        {
+            std::cerr << std::format("ERROR: Unsupported matcher {}. Use lightglue or loma.\n", matcher_name);
+            return 1;
+        }
+    }
+
     auto api = AIHoloImager::AIHoloImager::Api::Auto;
     if (vm.count("api") > 0)
     {
@@ -135,7 +158,7 @@ int main(int argc, char* argv[])
     try
     {
         AIHoloImager::AIHoloImager imager(device, api, tmp_dir, gpu_debug);
-        const AIHoloImager::Mesh mesh = imager.Generate(input_path, 2048, no_delight);
+        const AIHoloImager::Mesh mesh = imager.Generate(input_path, 2048, no_delight, matcher);
         AIHoloImager::SaveMesh(mesh, output_path);
 
 #ifndef AIHI_KEEP_INTERMEDIATES

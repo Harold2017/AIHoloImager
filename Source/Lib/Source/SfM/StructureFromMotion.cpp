@@ -91,6 +91,7 @@ using namespace openMVG::matching;
 using namespace openMVG::matching_image_collection;
 
 #if USES_SP_LG
+// LoMa-B also produces 256 bins, so it reuses the same region type.
 using SuperPointRegions = features::Scalar_Regions<features::PointFeature, float, 256>;
 
 EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION_INITIALIZER_LIST(SuperPointRegions)
@@ -98,6 +99,8 @@ EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION_INITIALIZER_LIST(SuperPointRegions)
 
 namespace AIHoloImager
 {
+    using FeatureMatcher = AIHoloImager::FeatureMatcher;
+
 #if USES_SP_LG
     class SuperPointImageDescriber : public features::Image_describer
     {
@@ -170,7 +173,7 @@ namespace AIHoloImager
         };
 
     public:
-        explicit Impl(AIHoloImagerInternal& aihi) : aihi_(aihi)
+        Impl(AIHoloImagerInternal& aihi, FeatureMatcher matcher) : aihi_(aihi), feature_matcher_(matcher)
         {
             PerfRegion init_perf(aihi_.PerfProfilerInstance(), "SfM init");
 
@@ -188,13 +191,17 @@ namespace AIHoloImager
                 point_cloud_estimator_point_cloud_method_ = python_system.GetAttr(*point_cloud_estimator_, "PointCloud");
 
 #if USES_SP_LG
-                extractor_module_ = python_system.Import("Extractor");
+                // Both expose an Extractor and a Matcher class with the same interface, only the
+                // module that holds them differs.
+                const char* const extractor_module_name = (feature_matcher_ == FeatureMatcher::LoMa) ? "LoMaExtractor" : "Extractor";
+                extractor_module_ = python_system.Import(extractor_module_name);
                 extractor_class_ = python_system.GetAttr(*extractor_module_, "Extractor");
                 extractor_ = python_system.CallObject(*extractor_class_);
                 extractor_extract_method_ = python_system.GetAttr(*extractor_, "Extract");
                 extractor_export_features_method_ = python_system.GetAttr(*extractor_, "ExportFeatures");
 
-                matcher_module_ = python_system.Import("Matcher");
+                const char* const matcher_module_name = (feature_matcher_ == FeatureMatcher::LoMa) ? "LoMaMatcher" : "Matcher";
+                matcher_module_ = python_system.Import(matcher_module_name);
                 matcher_class_ = python_system.GetAttr(*matcher_module_, "Matcher");
                 matcher_ = python_system.CallObject(*matcher_class_);
                 matcher_match_method_ = python_system.GetAttr(*matcher_, "Match");
@@ -285,6 +292,9 @@ namespace AIHoloImager
             {
                 sfm_data.poses.emplace(0, geometry::Pose3());
             }
+
+            std::cout << std::format("Registered views: {} of {}, points: {}\n", sfm_data.poses.size(), sfm_data.views.size(),
+                sfm_data.structure.size());
 
             return this->ExportResult(sfm_data, images);
         }
@@ -550,10 +560,14 @@ namespace AIHoloImager
             const uint32_t num_images = static_cast<uint32_t>(sfm_data.views.size());
 
 #if USES_SP_LG
-            std::vector<GpuTexture2D> gray_images(num_images);
+            const bool uses_rgb = (feature_matcher_ == FeatureMatcher::LoMa);
+            std::vector<GpuTexture2D> gray_images(uses_rgb ? 0 : num_images);
 #else
+            constexpr bool uses_rgb = false;
             std::vector<Image<unsigned char>> gray_images_cpu(num_images);
 #endif
+            // LoMa consumes RGB directly, so it skips the grayscale pass entirely.
+            if (!uses_rgb)
             {
                 auto cmd_list = gpu_system.CreateCommandList(GpuSystem::CmdQueueType::Compute);
 
@@ -632,13 +646,13 @@ namespace AIHoloImager
             py_features_ = python_system.MakeTupleOfSize(num_images);
             for (uint32_t i = 0; i < num_images; ++i)
             {
-                const auto& gray_image = gray_images[i];
+                const auto& input_image = uses_rgb ? images[i] : gray_images[i];
 
                 auto cmd_list = gpu_system.CreateCommandList(GpuSystem::CmdQueueType::Copy);
-                auto py_gray_image = MakePyObjectPtr(tensor_converter.ConvertPy(cmd_list, gray_image));
+                auto py_input_image = MakePyObjectPtr(tensor_converter.ConvertPy(cmd_list, input_image));
                 gpu_system.Execute(std::move(cmd_list));
 
-                PyObjectPtr py_feature = python_system.CallObject(*extractor_extract_method_, std::move(py_gray_image));
+                PyObjectPtr py_feature = python_system.CallObject(*extractor_extract_method_, std::move(py_input_image));
                 PyObjectPtr py_exported_feature = python_system.CallObject(*extractor_export_features_method_, *py_feature);
 
                 auto py_descriptors = python_system.GetTupleItem(*py_exported_feature, 0);
@@ -1398,6 +1412,8 @@ namespace AIHoloImager
 
         std::filesystem::path tmp_dir_;
 
+        FeatureMatcher feature_matcher_;
+
         PyObjectPtr point_cloud_estimator_module_;
         PyObjectPtr point_cloud_estimator_class_;
         PyObjectPtr point_cloud_estimator_;
@@ -1442,7 +1458,8 @@ namespace AIHoloImager
         static constexpr GpuFormat ColorFmt = GpuFormat::RGBA8_UNorm_SRGB;
     };
 
-    StructureFromMotion::StructureFromMotion(AIHoloImagerInternal& aihi) : impl_(std::make_unique<Impl>(aihi))
+    StructureFromMotion::StructureFromMotion(AIHoloImagerInternal& aihi, FeatureMatcher matcher)
+        : impl_(std::make_unique<Impl>(aihi, matcher))
     {
     }
 

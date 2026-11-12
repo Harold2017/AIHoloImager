@@ -132,6 +132,27 @@ set(aihi_files
     Source/SfM/LightGlue/LightGlue.py
     Source/SfM/LightGlue/SuperPoint.py
     Source/SfM/LightGlue/__init__.py
+    Source/SfM/LoMa/detector/dad.py
+    Source/SfM/LoMa/detector/utils.py
+    Source/SfM/LoMa/detector/__init__.py
+    Source/SfM/LoMa/descriptor/transformer/layers/attention.py
+    Source/SfM/LoMa/descriptor/transformer/layers/block.py
+    Source/SfM/LoMa/descriptor/transformer/layers/drop_path.py
+    Source/SfM/LoMa/descriptor/transformer/layers/layer_scale.py
+    Source/SfM/LoMa/descriptor/transformer/layers/mlp.py
+    Source/SfM/LoMa/descriptor/transformer/layers/patch_embed.py
+    Source/SfM/LoMa/descriptor/transformer/layers/__init__.py
+    Source/SfM/LoMa/descriptor/transformer/dinov2.py
+    Source/SfM/LoMa/descriptor/transformer/__init__.py
+    Source/SfM/LoMa/descriptor/dedode.py
+    Source/SfM/LoMa/descriptor/__init__.py
+    Source/SfM/LoMa/LoMa.py
+    Source/SfM/LoMa/device.py
+    Source/SfM/LoMa/geometry.py
+    Source/SfM/LoMa/io.py
+    Source/SfM/LoMa/types.py
+    Source/SfM/LoMa/weights.py
+    Source/SfM/LoMa/__init__.py
     Source/SfM/MoGe/Geometry.py
     Source/SfM/MoGe/Modules.py
     Source/SfM/MoGe/MoGeModel.py
@@ -140,6 +161,8 @@ set(aihi_files
     Source/SfM/Shader/UndistortCs.hlsl
     Source/SfM/ConvertDatasheet.py
     Source/SfM/Extractor.py
+    Source/SfM/LoMaExtractor.py
+    Source/SfM/LoMaMatcher.py
     Source/SfM/Matcher.py
     Source/SfM/PointCloudEstimator.py
     Source/SfM/StructureFromMotion.cpp
@@ -332,7 +355,30 @@ set(py_files
     Source/SfM/LightGlue/LightGlue.py
     Source/SfM/LightGlue/SuperPoint.py
     Source/SfM/LightGlue/__init__.py
+    Source/SfM/LoMa/detector/dad.py
+    Source/SfM/LoMa/detector/utils.py
+    Source/SfM/LoMa/detector/__init__.py
+    Source/SfM/LoMa/descriptor/transformer/layers/attention.py
+    Source/SfM/LoMa/descriptor/transformer/layers/block.py
+    Source/SfM/LoMa/descriptor/transformer/layers/drop_path.py
+    Source/SfM/LoMa/descriptor/transformer/layers/layer_scale.py
+    Source/SfM/LoMa/descriptor/transformer/layers/mlp.py
+    Source/SfM/LoMa/descriptor/transformer/layers/patch_embed.py
+    Source/SfM/LoMa/descriptor/transformer/layers/__init__.py
+    Source/SfM/LoMa/descriptor/transformer/dinov2.py
+    Source/SfM/LoMa/descriptor/transformer/__init__.py
+    Source/SfM/LoMa/descriptor/dedode.py
+    Source/SfM/LoMa/descriptor/__init__.py
+    Source/SfM/LoMa/LoMa.py
+    Source/SfM/LoMa/device.py
+    Source/SfM/LoMa/geometry.py
+    Source/SfM/LoMa/io.py
+    Source/SfM/LoMa/types.py
+    Source/SfM/LoMa/weights.py
+    Source/SfM/LoMa/__init__.py
     Source/SfM/Extractor.py
+    Source/SfM/LoMaExtractor.py
+    Source/SfM/LoMaMatcher.py
     Source/SfM/Matcher.py
     Source/SfM/PointCloudEstimator.py
     Source/SuperRes/RealESrGan/SrVggNetCompact.py
@@ -358,7 +404,7 @@ foreach(py_file ${py_files})
     )
 endforeach()
 
-add_dependencies(AIHoloImagerLib DeployPython DeployU2NetModels DeployIntrinsicModels DeployRealESrganModels DeployTrellisModels DeployMoGeModels DeployLightGlueModels AIHoloImagerGpuDiffRender AIHoloImagerSubMConv)
+add_dependencies(AIHoloImagerLib DeployPython DeployU2NetModels DeployIntrinsicModels DeployRealESrganModels DeployTrellisModels DeployMoGeModels DeployLightGlueModels DeployLoMaModels AIHoloImagerGpuDiffRender AIHoloImagerSubMConv)
 
 if(MSVC)
     target_link_libraries(AIHoloImagerLib

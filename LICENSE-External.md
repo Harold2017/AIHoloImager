@@ -14,6 +14,20 @@ This project uses the following open-source libraries and tools. We are grateful
 - **License**: [MIT License](https://github.com/jarro2783/cxxopts/blob/master/LICENSE)
 - **Copyright**: Jarryd Beck
 
+### DaD
+- **Repository**: https://github.com/Parskatt/dad
+- **Code & Pretrained Model License**: [MIT License](https://github.com/Parskatt/dad/blob/main/LICENSE)
+- **Copyright**: Johan Edstedt
+
+**Note**, we take the inference code as a part of LoMa.
+
+### DeDoDe
+- **Repository**: https://github.com/Parskatt/DeDoDe
+- **Code & Pretrained Model License**: [MIT License](https://github.com/Parskatt/DeDoDe/blob/main/LICENSE)
+- **Copyright**: Johan Edstedt, Georg Bökman, Fredrik Kahl, Mårten Wadenbäck
+
+**Note**, we take the inference code as a part of LoMa.
+
 ### dinov2
 - **Repository**: https://github.com/facebookresearch/dinov2
 - **Code & Pretrained Model License**: [Apache License 2.0](https://github.com/facebookresearch/dinov2/blob/main/LICENSE)
@@ -45,6 +59,14 @@ This project uses the following open-source libraries and tools. We are grateful
 - **Repository**: https://github.com/cvg/LightGlue
 - **Code & Pretrained Model License**: [Apache-2.0 License](https://github.com/cvg/LightGlue/blob/main/LICENSE)
 - **Copyright**: Philipp Lindenberger, Paul-Edouard Sarlin, Marc Pollefeys
+
+### LoMa
+- **Repository**: https://github.com/davnords/LoMa
+- **Code License**: [MIT License](https://github.com/davnords/LoMa/blob/main/LICENSE), the matcher part inherits [Apache-2.0 License](https://github.com/cvg/LightGlue/blob/main/LICENSE) from LightGlue
+- **Pretrained Model License**: [MIT License](https://github.com/davnords/LoMa/blob/main/LICENSE)
+- **Copyright**: David Nordström, Johan Edstedt, Georg Bökman, Jonathan Astermark, Anders Heyden, Viktor Larsson, Mårten Wadenbäck, Michael Felsberg, Fredrik Kahl
+
+**Note**, we take the inference code from LoMa, and it already contains the frozen DINOv2 and DaD weights.
 
 ### MoGe
 - **Repository**: https://github.com/microsoft/moge

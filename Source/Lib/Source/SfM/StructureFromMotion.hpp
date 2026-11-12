@@ -10,6 +10,7 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 
+#include "AIHoloImager/AIHoloImager.hpp"
 #include "AIHoloImagerInternal.hpp"
 #include "Base/Noncopyable.hpp"
 
@@ -39,7 +40,7 @@ namespace AIHoloImager
         };
 
     public:
-        explicit StructureFromMotion(AIHoloImagerInternal& aihi);
+        explicit StructureFromMotion(AIHoloImagerInternal& aihi, AIHoloImager::FeatureMatcher matcher);
         StructureFromMotion(StructureFromMotion&& other) noexcept;
         ~StructureFromMotion() noexcept;
 
