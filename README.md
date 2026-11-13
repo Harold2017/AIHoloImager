@@ -16,6 +16,22 @@ AIHoloImager currently supports only Windows. To get started, use CMake to gener
 * [Visual Studio 2022 or 2026](https://www.visualstudio.com/downloads).
 * [CMake](https://www.cmake.org/download/). Version 3.25 or up. It's highly recommended to choose "Add CMake to the system PATH for all users" during installation.
 
+# Intermediate results
+
+The intermediate results are removed at the end of the run. To keep them, turn on the `AIHI_KEEP_INTERMEDIATES` CMake option when configuring the project, for example:
+
+```
+cmake -S . -B build -DAIHI_KEEP_INTERMEDIATES=ON
+```
+
+The delighted images are saved to `<output-dir>/Tmp/Delighter/Delighted_<image-name>.jpg`. They carry no Exif metadata, because they are crops of the undistorted inputs. To get them back with the Exif metadata of the original photos, run:
+
+```
+python Scripts/ExtractDelightedImages.py <input-dir> <output-dir>/Tmp/Delighter
+```
+
+The images are written to `<delighted-dir>/Exif` by default. Use `-o <output-dir>` to change it.
+
 # License
 
 AIHoloImager is distributed under the terms of MIT License. See [LICENSE](LICENSE) for details.

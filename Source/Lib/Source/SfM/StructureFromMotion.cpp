@@ -157,6 +157,7 @@ namespace AIHoloImager
         struct View
         {
             GpuTexture2D image;
+            std::filesystem::path image_path;
 
             uint32_t intrinsic_id;
 
@@ -977,6 +978,7 @@ namespace AIHoloImager
                     result_view.rotation = glm::transpose(result_view.rotation);
                     const auto& center = mvg_pose.center();
                     result_view.center = {center.x(), center.y(), center.z()};
+                    result_view.image_path = std::filesystem::path(sfm_data.s_root_path) / mvg_view.second->s_Img_path;
 
                     GpuTexture2D& distort_gpu_tex = images[mvg_view.first];
 
@@ -1032,6 +1034,7 @@ namespace AIHoloImager
                 const auto& intrinsic = intrinsics[view.intrinsic_id];
 
                 projection.image = std::make_shared<GpuTexture2D>(std::move(view.image));
+                projection.image_path = view.image_path;
 
                 projection.view_mtx = this->CalcViewMatrix(view);
                 projection.proj_mtx = this->CalcProjMatrix(intrinsic, 0.1f, 30.0f);

@@ -23,6 +23,7 @@ namespace AIHoloImager
         struct ProjectionDesc
         {
             std::shared_ptr<GpuTexture2D> image;
+            std::filesystem::path image_path;
 
             glm::mat4x4 view_mtx;
             glm::mat4x4 proj_mtx;
