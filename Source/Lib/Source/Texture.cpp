@@ -234,15 +234,17 @@ namespace AIHoloImager
 
     Texture LoadTexture(const std::filesystem::path& path)
     {
-        int width, height;
+        int width = 0;
+        int height = 0;
         uint8_t* data = stbi_load(path.string().c_str(), &width, &height, nullptr, 4);
-
-        Texture tex(width, height, ElementFormat::RGBA8_UNorm_SRGB);
-        if (data != nullptr)
+        if (data == nullptr)
         {
-            std::memcpy(tex.Data(), data, tex.DataSize());
-            stbi_image_free(data);
+            return {};
         }
+
+        Texture tex(static_cast<uint32_t>(width), static_cast<uint32_t>(height), ElementFormat::RGBA8_UNorm_SRGB);
+        std::memcpy(tex.Data(), data, tex.DataSize());
+        stbi_image_free(data);
 
         return tex;
     }

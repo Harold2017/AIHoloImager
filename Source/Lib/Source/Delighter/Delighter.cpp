@@ -129,34 +129,26 @@ namespace AIHoloImager
             gpu_system.Execute(std::move(cmd_list));
 
             *projection.image = std::move(delighted_tex);
-
-#ifdef AIHI_KEEP_INTERMEDIATES
-            this->SaveDelightedImage(*projection.image, projection.image_path);
-#endif
         }
 
-    private:
-#ifdef AIHI_KEEP_INTERMEDIATES
-        void SaveDelightedImage(const GpuTexture2D& image, const std::filesystem::path& source_path)
+        Texture ReadBackImage(const AIHoloImagerInternal::ProjectionDesc& projection)
         {
             auto& gpu_system = aihi_.GpuSystemInstance();
 
             auto cmd_list = gpu_system.CreateCommandList(GpuSystem::CmdQueueType::Copy);
 
-            Texture read_back_image(image.Width(0), image.Height(0), ElementFormat::RGBA8_UNorm_SRGB);
-            const auto rb_future = cmd_list.ReadBackAsync(image, 0, read_back_image.Data(), read_back_image.DataSize());
+            const uint32_t width = projection.image->Width(0);
+            const uint32_t height = projection.image->Height(0);
+
+            Texture image_cpu(width, height, ElementFormat::RGBA8_UNorm_SRGB);
+            const auto rb_future = cmd_list.ReadBackAsync(*projection.image, 0, image_cpu.Data(), image_cpu.DataSize());
             gpu_system.Execute(std::move(cmd_list));
             rb_future.wait();
 
-            const std::string file_stem = source_path.empty() ? std::to_string(saved_image_count_++) : source_path.stem().string();
-
-            const auto output_dir = aihi_.TmpDir() / "Delighter";
-            std::filesystem::create_directories(output_dir);
-
-            SaveTexture(read_back_image, output_dir / std::format("Delighted_{}.jpg", file_stem));
+            return image_cpu;
         }
-#endif
 
+    private:
         AIHoloImagerInternal& aihi_;
 
         PyObjectPtr delighter_module_;
@@ -165,10 +157,6 @@ namespace AIHoloImager
         PyObjectPtr delighter_process_method_;
         std::future<void> py_init_future_;
         bool py_init_finished_ = false;
-
-#ifdef AIHI_KEEP_INTERMEDIATES
-        uint32_t saved_image_count_ = 0;
-#endif
 
         struct MergeMaskConstantBuffer
         {
@@ -190,5 +178,10 @@ namespace AIHoloImager
     void Delighter::Process(AIHoloImagerInternal::ProjectionDesc& projection)
     {
         impl_->Process(projection);
+    }
+
+    Texture Delighter::ReadBackImage(const AIHoloImagerInternal::ProjectionDesc& projection)
+    {
+        return impl_->ReadBackImage(projection);
     }
 } // namespace AIHoloImager

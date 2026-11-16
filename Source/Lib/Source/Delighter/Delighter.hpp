@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "AIHoloImager/Texture.hpp"
 #include "AIHoloImagerInternal.hpp"
 #include "Base/Noncopyable.hpp"
 
@@ -20,6 +21,9 @@ namespace AIHoloImager
         Delighter& operator=(Delighter&& other) noexcept;
 
         void Process(AIHoloImagerInternal::ProjectionDesc& projection);
+
+        // Reads the delighted image back from the GPU.
+        Texture ReadBackImage(const AIHoloImagerInternal::ProjectionDesc& projection);
 
     private:
         class Impl;

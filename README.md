@@ -32,6 +32,18 @@ python Scripts/ExtractDelightedImages.py <input-dir> <output-dir>/Tmp/Delighter
 
 The images are written to `<delighted-dir>/Exif` by default. Use `-o <output-dir>` to change it.
 
+# Delighting images
+
+`AIHoloImagerDelight` is a standalone executable for the image delighting step. It removes the lighting and the specular reflections from photos without running the whole reconstruction:
+
+```
+AIHoloImagerDelight -I <input-dir> -O <output-dir>
+```
+
+`-I` accepts a folder or a single image, and `-O` defaults to `<input-dir>/Delighted`. The output images keep the file names and the dimensions of the inputs, and carry the Exif metadata of the originals. PNG inputs stay lossless, and the other formats are saved as JPEG.
+
+Images larger than 2048 pixels are delighted at a reduced resolution and scaled back, which bounds the GPU memory usage. Use `-S <pixels>` to change the limit, or `-S 0` to delight at the full resolution.
+
 # License
 
 AIHoloImager is distributed under the terms of MIT License. See [LICENSE](LICENSE) for details.

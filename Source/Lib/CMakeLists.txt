@@ -187,6 +187,8 @@ set(aihi_files
     Source/Util/BoundingBox.hpp
     Source/Util/CameraUtil.cpp
     Source/Util/CameraUtil.hpp
+    Source/Util/ExifMetadata.cpp
+    Source/Util/ExifMetadata.hpp
     Source/Util/FormatConversion.cpp
     Source/Util/FormatConversion.hpp
     Source/Util/GpuMesh.cpp
