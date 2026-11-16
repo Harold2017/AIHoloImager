@@ -48,15 +48,14 @@ namespace AIHoloImager
             if (!py_init_finished_)
             {
                 py_init_future_.wait();
+                py_init_finished_ = true;
             }
 
             PythonSystem::ThreadStateGuard guard;
 
             auto& python_system = aihi_.PythonSystemInstance();
-            auto image_upsampler_destroy_method = python_system.GetAttr(*super_res_, "Destroy");
-            python_system.CallObject(*image_upsampler_destroy_method);
+            python_system.CallDestroyMethod(super_res_.get());
 
-            image_upsampler_destroy_method.reset();
             super_res_process_method_.reset();
             super_res_.reset();
             super_res_class_.reset();
@@ -107,9 +106,8 @@ namespace AIHoloImager
             if (!py_init_finished_)
             {
                 PerfRegion wait_perf(aihi_.PerfProfilerInstance(), "Wait for init");
-                py_init_future_.wait();
-
                 py_init_finished_ = true;
+                py_init_future_.get();
             }
 
             GpuTexture3D upsampled_residual_tex;

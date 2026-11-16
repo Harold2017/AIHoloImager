@@ -50,6 +50,9 @@ namespace AIHoloImager
         PyObjectPtr CallObject(PyObject& object);
         PyObjectPtr CallObjectTuple(PyObject& object, PyObject& tuple_args);
 
+        // Calls the Destroy method of a Python object without throwing, so it's safe to use in a destructor.
+        void CallDestroyMethod(PyObject* object) noexcept;
+
         template <typename... Args>
         PyObjectPtr CallObject(PyObject& object, Args&&... args)
         {

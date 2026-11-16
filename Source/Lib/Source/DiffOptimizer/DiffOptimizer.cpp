@@ -47,15 +47,14 @@ namespace AIHoloImager
             if (!py_init_finished_)
             {
                 py_init_future_.wait();
+                py_init_finished_ = true;
             }
 
             PythonSystem::ThreadStateGuard guard;
 
             auto& python_system = aihi_.PythonSystemInstance();
-            auto diff_optimizer_destroy_method = python_system.GetAttr(*diff_optimizer_, "Destroy");
-            python_system.CallObject(*diff_optimizer_destroy_method);
+            python_system.CallDestroyMethod(diff_optimizer_.get());
 
-            diff_optimizer_destroy_method.reset();
             diff_optimizer_opt_texture_method_.reset();
             diff_optimizer_opt_transform_method_.reset();
             diff_optimizer_.reset();
@@ -117,9 +116,8 @@ namespace AIHoloImager
             if (!py_init_finished_)
             {
                 PerfRegion wait_perf(aihi_.PerfProfilerInstance(), "Wait for init");
-                py_init_future_.wait();
-
                 py_init_finished_ = true;
+                py_init_future_.get();
             }
 
             {
@@ -215,9 +213,11 @@ namespace AIHoloImager
                 vp_offsets[i] = projection.vp_offset;
             }
 
+            if (!py_init_finished_)
             {
                 PerfRegion wait_perf(aihi_.PerfProfilerInstance(), "Wait for init");
-                py_init_future_.wait();
+                py_init_finished_ = true;
+                py_init_future_.get();
             }
 
             {

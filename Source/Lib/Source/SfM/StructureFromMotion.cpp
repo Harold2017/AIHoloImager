@@ -227,16 +227,15 @@ namespace AIHoloImager
             if (!py_init_finished_)
             {
                 py_init_future_.wait();
+                py_init_finished_ = true;
             }
 
             PythonSystem::ThreadStateGuard guard;
 
             auto& python_system = aihi_.PythonSystemInstance();
 
-            auto point_cloud_estimator_destroy_method = python_system.GetAttr(*point_cloud_estimator_, "Destroy");
-            python_system.CallObject(*point_cloud_estimator_destroy_method);
+            python_system.CallDestroyMethod(point_cloud_estimator_.get());
 
-            point_cloud_estimator_destroy_method.reset();
             point_cloud_estimator_focal_method_.reset();
             point_cloud_estimator_point_cloud_method_.reset();
             point_cloud_estimator_.reset();
@@ -246,20 +245,16 @@ namespace AIHoloImager
 #if USES_SP_LG
             py_features_.reset();
 
-            auto extractor_destroy_method = python_system.GetAttr(*extractor_, "Destroy");
-            python_system.CallObject(*extractor_destroy_method);
+            python_system.CallDestroyMethod(extractor_.get());
 
-            extractor_destroy_method.reset();
             extractor_extract_method_.reset();
             extractor_export_features_method_.reset();
             extractor_.reset();
             extractor_class_.reset();
             extractor_module_.reset();
 
-            auto matcher_destroy_method = python_system.GetAttr(*matcher_, "Destroy");
-            python_system.CallObject(*matcher_destroy_method);
+            python_system.CallDestroyMethod(matcher_.get());
 
-            matcher_destroy_method.reset();
             matcher_match_method_.reset();
             matcher_.reset();
             matcher_class_.reset();

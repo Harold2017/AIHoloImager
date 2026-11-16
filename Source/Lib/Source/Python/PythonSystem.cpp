@@ -4,6 +4,7 @@
 #include "PythonSystem.hpp"
 
 #include <format>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 
@@ -160,6 +161,24 @@ namespace AIHoloImager
     PyObjectPtr PythonSystem::CallObjectTuple(PyObject& object, PyObject& tuple_args)
     {
         return CheckPyResult(PyObject_CallObject(&object, &tuple_args));
+    }
+
+    void PythonSystem::CallDestroyMethod(PyObject* object) noexcept
+    {
+        if (object == nullptr)
+        {
+            return;
+        }
+
+        try
+        {
+            const PyObjectPtr destroy_method = this->GetAttr(*object, "Destroy");
+            this->CallObject(*destroy_method);
+        }
+        catch (const std::exception& ex)
+        {
+            std::cerr << std::format("WARNING: Failed to destroy a Python object, {}\n", ex.what());
+        }
     }
 
     PyObjectPtr PythonSystem::MakeObject(int32_t value)

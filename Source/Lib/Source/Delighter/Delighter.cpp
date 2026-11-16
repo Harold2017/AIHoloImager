@@ -46,15 +46,14 @@ namespace AIHoloImager
             if (!py_init_finished_)
             {
                 py_init_future_.wait();
+                py_init_finished_ = true;
             }
 
             PythonSystem::ThreadStateGuard guard;
 
             auto& python_system = aihi_.PythonSystemInstance();
-            auto delighter_destroy_method = python_system.GetAttr(*delighter_, "Destroy");
-            python_system.CallObject(*delighter_destroy_method);
+            python_system.CallDestroyMethod(delighter_.get());
 
-            delighter_destroy_method.reset();
             delighter_process_method_.reset();
             delighter_.reset();
             delighter_class_.reset();
@@ -82,9 +81,8 @@ namespace AIHoloImager
             if (!py_init_finished_)
             {
                 PerfRegion wait_perf(aihi_.PerfProfilerInstance(), "Wait for init", &cmd_list);
-                py_init_future_.wait();
-
                 py_init_finished_ = true;
+                py_init_future_.get();
             }
 
             GpuTexture2D delighted_tex;

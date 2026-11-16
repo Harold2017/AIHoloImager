@@ -96,15 +96,14 @@ namespace AIHoloImager
             if (!py_init_finished_)
             {
                 py_init_future_.wait();
+                py_init_finished_ = true;
             }
 
             PythonSystem::ThreadStateGuard guard;
 
             auto& python_system = aihi_.PythonSystemInstance();
-            auto mask_generator_destroy_method = python_system.GetAttr(*mask_generator_, "Destroy");
-            python_system.CallObject(*mask_generator_destroy_method);
+            python_system.CallDestroyMethod(mask_generator_.get());
 
-            mask_generator_destroy_method.reset();
             mask_generator_gen_method_.reset();
             mask_generator_.reset();
             mask_generator_class_.reset();
@@ -328,9 +327,8 @@ namespace AIHoloImager
             if (!py_init_finished_)
             {
                 PerfRegion wait_perf(aihi_.PerfProfilerInstance(), "Wait for init", &cmd_list);
-                py_init_future_.wait();
-
                 py_init_finished_ = true;
+                py_init_future_.get();
             }
 
             {

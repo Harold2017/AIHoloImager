@@ -3,6 +3,8 @@
 
 #include "D3D12Resource.hpp"
 
+#include <iostream>
+
 #include "D3D12Buffer.hpp"
 #include "D3D12Conversion.hpp"
 #include "D3D12System.hpp"
@@ -200,8 +202,14 @@ namespace AIHoloImager
             .VisibleNodeMask = 1,
         };
 
-        TIFHR(d3d12_device->CreateCommittedResource(&heap_prop, ToD3D12HeapFlags(flags), &desc_, ToD3D12ResourceState(init_state), nullptr,
-            UuidOf<ID3D12Resource>(), resource_.Object().PutVoid()));
+        const HRESULT create_hr = d3d12_device->CreateCommittedResource(&heap_prop, ToD3D12HeapFlags(flags), &desc_,
+            ToD3D12ResourceState(init_state), nullptr, UuidOf<ID3D12Resource>(), resource_.Object().PutVoid());
+        if (create_hr == DXGI_ERROR_DEVICE_REMOVED)
+        {
+            std::cerr << std::format("[DBG] D3D12 device removed. Reason: 0x{:08X}\n",
+                static_cast<uint32_t>(d3d12_device->GetDeviceRemovedReason()));
+        }
+        TIFHR(create_hr);
         this->Name(std::move(name));
 
         if (EnumHasAny(flags, GpuResourceFlag::Shareable))

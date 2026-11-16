@@ -120,15 +120,14 @@ namespace AIHoloImager
             if (!py_init_finished_)
             {
                 py_init_future_.wait();
+                py_init_finished_ = true;
             }
 
             PythonSystem::ThreadStateGuard guard;
 
             auto& python_system = aihi_.PythonSystemInstance();
-            auto mesh_generator_destroy_method = python_system.GetAttr(*mesh_generator_, "Destroy");
-            python_system.CallObject(*mesh_generator_destroy_method);
+            python_system.CallDestroyMethod(mesh_generator_.get());
 
-            mesh_generator_destroy_method.reset();
             mesh_generator_gsplat_num_gaussians_method_.reset();
             mesh_generator_gsplat_sh_coefficients_method_.reset();
             mesh_generator_gsplat_positions_method_.reset();
