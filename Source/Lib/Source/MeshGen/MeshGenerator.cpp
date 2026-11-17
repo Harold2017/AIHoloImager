@@ -539,26 +539,33 @@ namespace AIHoloImager
                 const VertexDesc pos_clr_vertex_desc(pos_clr_vertex_attribs);
 
                 {
-                    Mesh pc_mesh = Mesh(pos_clr_vertex_desc, static_cast<uint32_t>(object_points.size()), 0);
-
-                    for (uint32_t i = 0; i < static_cast<uint32_t>(object_points.size()); ++i)
+                    // A degenerate reconstruction can leave no object points, and PLY export of an empty point cloud is unsafe.
+                    if (!object_points.empty() && (object_colors.size() == object_points.size()))
                     {
-                        pc_mesh.VertexData<glm::vec3>(i, PosAttribIndex) = object_points[i];
-                        pc_mesh.VertexData<glm::vec3>(i, ColorAttribIndex) = object_colors[i];
-                    }
+                        Mesh pc_mesh = Mesh(pos_clr_vertex_desc, static_cast<uint32_t>(object_points.size()), 0);
 
-                    SaveMesh(pc_mesh, tmp_dir / "ObjectPoints.ply");
+                        for (uint32_t i = 0; i < static_cast<uint32_t>(object_points.size()); ++i)
+                        {
+                            pc_mesh.VertexData<glm::vec3>(i, PosAttribIndex) = object_points[i];
+                            pc_mesh.VertexData<glm::vec3>(i, ColorAttribIndex) = object_colors[i];
+                        }
+
+                        SaveMesh(pc_mesh, tmp_dir / "ObjectPoints.ply");
+                    }
                 }
                 {
-                    Mesh pc_mesh = Mesh(pos_clr_vertex_desc, static_cast<uint32_t>(plane_points.size()), 0);
-
-                    for (uint32_t i = 0; i < static_cast<uint32_t>(plane_points.size()); ++i)
+                    if (!plane_points.empty() && (plane_colors.size() == plane_points.size()))
                     {
-                        pc_mesh.VertexData<glm::vec3>(i, PosAttribIndex) = plane_points[i];
-                        pc_mesh.VertexData<glm::vec3>(i, ColorAttribIndex) = plane_colors[i];
-                    }
+                        Mesh pc_mesh = Mesh(pos_clr_vertex_desc, static_cast<uint32_t>(plane_points.size()), 0);
 
-                    SaveMesh(pc_mesh, tmp_dir / "PlanePoints.ply");
+                        for (uint32_t i = 0; i < static_cast<uint32_t>(plane_points.size()); ++i)
+                        {
+                            pc_mesh.VertexData<glm::vec3>(i, PosAttribIndex) = plane_points[i];
+                            pc_mesh.VertexData<glm::vec3>(i, ColorAttribIndex) = plane_colors[i];
+                        }
+
+                        SaveMesh(pc_mesh, tmp_dir / "PlanePoints.ply");
+                    }
                 }
             }
 #endif
